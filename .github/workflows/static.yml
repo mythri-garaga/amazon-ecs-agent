@@ -17,10 +17,9 @@ jobs:
       run: |
         pwd
         cd $GITHUB_WORKSPACE/src/github.com/aws/amazon-ecs-agent
-        echo '${{ github.event.pull_request.head.sha }}'
+        echo '${{ github.event.pull_request.head.sha[:8] }}'
         echo ${GOPATH}
-        echo al2-integ-${{ github.event.pull_request.head.sha }}
-        echo al2-integ-'${{ github.event.pull_request.head.sha }}'
+        echo al2-integ-${{ github.event.pull_request.head.sha[:8] }}
         echo ${GOROOT}
         make get-deps
         make static-check
