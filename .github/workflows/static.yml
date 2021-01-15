@@ -15,11 +15,16 @@ jobs:
         path: src/github.com/aws/amazon-ecs-agent
     - name: run static checks
       run: |
-        export GOPATH=$GITHUB_WORKSPACE
-        export PATH=$PATH:$(go env GOPATH)/bin
+        pwd
         cd $GITHUB_WORKSPACE/src/github.com/aws/amazon-ecs-agent
+        echo '${{ github.event.pull_request.head.sha[:8] }}'
+        echo ${GOPATH}
+        echo al2-integ-${{ github.event.pull_request.head.sha[:8] }}
+        echo ${GOROOT}
         make get-deps
         make static-check
+      env:
+        GOPATH: /home/runner/work/amazon-ecs-agent/amazon-ecs-agent
 
   x-platform-build:
     name: Cross platform build
