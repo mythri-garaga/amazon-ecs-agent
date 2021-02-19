@@ -1,0 +1,43 @@
+name: AL2 Integration Test Suite
+on:
+  pull_request:
+    types: [labeled]
+jobs:
+  search-target-runner:
+    if: ${{ github.event.label.name == 'bot/test' }}
+    runs-on: [self-hosted, linux, X64, listener]
+    strategy:
+      fail-fast: false
+    steps:
+      - name: search
+        run: |
+          cd /home/ec2-user/
+          echo $GITHUB_SHA
+          sudo ./searchRunner.sh al2-integ ${{ github.event.pull_request.head.sha }}
+          retVal=$?
+          if [ $retVal -eq 1 ]; then
+              exit 1
+          fi
+  linux-al2-integ-test:
+    needs: search-target-runner
+    runs-on: [self-hosted, linux, '${{ matrix.type }}', '${{ matrix.test }}']
+    strategy:
+      fail-fast: false
+      matrix:
+        type: [al2]
+        test: [integ]
+    steps:
+      - uses: actions/setup-go@v2
+        with:
+          go-version: 1.15.4
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+          path: src/github.com/aws/amazon-ecs-agent
+      - name: make run-integ-tests
+        run: |
+          export GOPATH=$GITHUB_WORKSPACE
+          cd $GITHUB_WORKSPACE/src/github.com/aws/amazon-ecs-agent
+          export CGROUP_PATH="/sys/fs/cgroup"
+          make run-integ-tests
+          shutdown -hP now
